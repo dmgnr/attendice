@@ -2,8 +2,8 @@ import { inspect } from "node:util";
 import { eq, sql } from "drizzle-orm";
 import z from "zod";
 import { command, query } from "$app/server";
-import { db } from "../lib/server/db";
-import { attendances, students } from "../lib/server/db/schema";
+import { db } from "../../lib/server/db";
+import { attendances, students } from "../../lib/server/db/schema";
 
 export const submitUid: (obj: {
   uid: string;

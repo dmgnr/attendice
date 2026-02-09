@@ -5,5 +5,10 @@
 	const { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head
+	><link rel="icon" href={favicon} /><meta
+		name="darkreader"
+		content="disable"
+	/></svelte:head
+>
 {@render children()}
