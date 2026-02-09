@@ -5,7 +5,7 @@
   import Idle from "$lib/components/Idle.svelte";
   import TimeDisplay from "$lib/components/TimeDisplay.svelte";
   import UidInput from "$lib/components/UidInput.svelte";
-  import { getStats, submitUid } from "./submit.remote";
+  import { getStats, submitUid, uploadPicture } from "./submit.remote";
 
   let camera = $state<Camera>();
   let idle = $state(true);
@@ -26,7 +26,7 @@
       //   method: "POST",
       //   body: JSON.stringify({ uid }),
       // });
-      const r = await submitUid({ uid, pict });
+      const r = await submitUid(uid);
       console.log(r);
       switch (r.status) {
         case 404:
@@ -47,6 +47,7 @@
               ...json,
             },
           });
+          if (pict) uploadPicture({ id: r.id, pict });
           break;
         }
       }
