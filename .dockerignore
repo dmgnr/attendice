@@ -1,0 +1,9 @@
+README.md
+.vscode/
+.svelte-kit/
+data/
+note_modules/
+Dockerfile
+compose.yml
+.dockerignore
+build/

@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - 8806:3000
+    volumes:
+      - ./data:/app/data
