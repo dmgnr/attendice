@@ -10,6 +10,7 @@
   let camera = $state<Camera>();
   let idle = $state(true);
   let stats = $state("...");
+  let online = $state(true);
   async function submit(uid: string) {
     const id = toast.loading("กำลังส่งข้อมูล...", {
       duration: 30000,
@@ -58,8 +59,14 @@
   }
   $effect(() => {
     async function fetchStats() {
-      await getStats().refresh();
-      stats = await getStats();
+      try {
+        await getStats().refresh();
+        stats = await getStats();
+        online = true;
+      } catch (e) {
+        console.error("Cannot poll stats", e);
+        online = false;
+      }
     }
     const interval = setInterval(fetchStats, 60000);
     fetchStats();
@@ -73,7 +80,7 @@
   <Toaster expand richColors position="top-right" />
   <Idle {idle} />
   <div class="flex grow h-fit">
-    <TimeDisplay bind:idle />
+    <TimeDisplay bind:idle {online} />
     {#if !idle}
       <span
         class="flex flex-col text-2xl p-1 m-2 rounded bg-[#fff5] justify-evenly items-center"

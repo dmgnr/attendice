@@ -2,8 +2,11 @@
   import { House, School, Wifi } from "@lucide/svelte";
   import { cn } from "$lib/utils";
 
-  let { idle = $bindable(false), io = $bindable<"in" | "out">("in") } =
-    $props();
+  let {
+    idle = $bindable(false),
+    io = $bindable<"in" | "out">("in"),
+    online = false,
+  } = $props();
 
   let time = $state("00:00:00");
   $effect(() => {
@@ -42,7 +45,7 @@
         {#if io == "in"}<School class="text-emerald-600" /> เวลาเข้า
         {:else}<House class="text-red-600" /> เวลาออก{/if}
       </span>
-      <Wifi class="text-emerald-600" />
+      <Wifi class={online ? "text-emerald-600" : "text-red-600"} />
     </div>
   {/if}
   <span class="h-0 overflow-hidden">10:00:00 น.</span>
