@@ -1,7 +1,7 @@
 import { inspect } from "node:util";
 import { eq, sql } from "drizzle-orm";
 import z from "zod";
-import { query } from "$app/server";
+import { command, query } from "$app/server";
 import { db } from "../lib/server/db";
 import { attendances, students } from "../lib/server/db/schema";
 
@@ -11,7 +11,7 @@ export const submitUid: (obj: {
 }) => Promise<
   | { status: 404 | 409; student: undefined }
   | { status: 200; student: typeof students.$inferSelect }
-> = query(
+> = command(
   z.object({
     uid: z.string().min(10).regex(/^\d+$/),
     pict: z.string().optional(),
@@ -23,24 +23,27 @@ export const submitUid: (obj: {
         .insert(attendances)
         .values({
           student: uid,
-          pict: pict ? await fetch(pict).then((r) => r.blob()) : "",
+          pict: pict
+            ? Buffer.from(await fetch(pict).then((r) => r.bytes()))
+            : "",
         })
         .onConflictDoNothing()
         .returning({ id: attendances.id });
     } catch (err: unknown) {
       if (
-        typeof err === "object" &&
-        err &&
-        "cause" in err &&
-        typeof err.cause === "object" &&
-        err.cause &&
-        "code" in err.cause &&
-        (err.cause.code === "SQLITE_CONSTRAINT" ||
-          ("message" in err.cause &&
-            typeof err.cause.message === "string" &&
-            err.cause.message.includes("SQLITE_CONSTRAINT")))
+        z
+          .object({
+            cause: z
+              .object({ code: z.string().includes("SQLITE_CONSTRAINT") })
+              .or(
+                z.object({
+                  message: z.string().includes("SQLITE_CONSTRAINT"),
+                }),
+              ),
+          })
+          .safeParse(err).success
       ) {
-        return { status: 404 };
+        return { status: 404 } as const;
       }
       console.log(inspect(err, { showHidden: true, depth: null }));
       throw err;
