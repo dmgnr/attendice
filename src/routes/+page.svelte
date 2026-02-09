@@ -11,7 +11,10 @@
   let idle = $state(true);
   let stats = $state("...");
   async function submit(uid: string) {
-    const id = toast.loading("กำลังส่งข้อมูล...", { duration: 30000 });
+    const id = toast.loading("กำลังส่งข้อมูล...", {
+      duration: 30000,
+      class: "font-google-sans",
+    });
     try {
       let pict: string | undefined;
       try {
@@ -54,6 +57,7 @@
   }
   $effect(() => {
     async function fetchStats() {
+      await getStats().refresh();
       stats = await getStats();
     }
     const interval = setInterval(fetchStats, 60000);
