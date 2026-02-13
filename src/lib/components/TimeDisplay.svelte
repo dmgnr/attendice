@@ -8,7 +8,12 @@
     online = false,
   } = $props();
 
-  let time = $state("00:00:00");
+  let time = $state(
+    new Date().toLocaleTimeString("en-GB", {
+      hour12: false,
+      timeZone: "Asia/Bangkok",
+    }),
+  );
   $effect(() => {
     function tick() {
       const now = new Date();
@@ -48,5 +53,6 @@
       <Wifi class={online ? "text-emerald-600" : "text-red-600"} />
     </div>
   {/if}
+  <!-- Max width guide -->
   <span class="h-0 overflow-hidden">10:00:00 น.</span>
 </span>
