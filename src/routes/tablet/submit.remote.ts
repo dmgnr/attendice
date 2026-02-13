@@ -1,7 +1,9 @@
 import { inspect } from "node:util";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import z from "zod";
-import { command, query } from "$app/server";
+import { command } from "$app/server";
+import { getStats } from "$lib/server/queries";
+import { sse } from "$lib/server/redis";
 import { db } from "../../lib/server/db";
 import { attendances, students } from "../../lib/server/db/schema";
 
@@ -20,6 +22,13 @@ export const submitUid: (
       })
       .onConflictDoNothing()
       .returning({ id: attendances.id });
+
+    getStats().then((stats) =>
+      sse.publish("main", {
+        event: "stats",
+        data: stats,
+      }),
+    );
   } catch (err: unknown) {
     if (
       z
@@ -64,28 +73,6 @@ export const uploadPicture = command(
       .then((e) => ({ status: e.length ? 200 : 404 }));
   },
 );
-
-export const getStats = query(async () => {
-  const res = await db.run(sql<{ label: string }>`
-    SELECT
-      present || '/' || total AS label
-    FROM (
-      SELECT
-        COALESCE(SUM(
-          CASE
-            WHEN ${attendances.type} = 'in' THEN 1
-            WHEN ${attendances.type} = 'out' THEN -1
-          END
-        ), 0) AS present
-      FROM ${attendances}
-      WHERE ${attendances.day} = date(datetime('now', '+7 hours'))
-    ),
-    (
-      SELECT COUNT(*) AS total FROM ${students}
-    );
-  `);
-  return res.rows[0]?.label?.toString() || "";
-});
 
 function parseDataUriImage(input: string, maxBytes = 2_000_000) {
   if (!input.startsWith("data:")) throw new Error("Invalid data URI");

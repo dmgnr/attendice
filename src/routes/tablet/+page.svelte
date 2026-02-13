@@ -1,16 +1,34 @@
 <script lang="ts">
   import { Toaster, toast } from "svelte-sonner";
+  import { source } from "sveltekit-sse";
+  import { page } from "$app/state";
   import Camera from "$lib/components/Camera.svelte";
   import Card from "$lib/components/Card.svelte";
   import Idle from "$lib/components/Idle.svelte";
   import TimeDisplay from "$lib/components/TimeDisplay.svelte";
   import UidInput from "$lib/components/UidInput.svelte";
-  import { getStats, submitUid, uploadPicture } from "./submit.remote";
+  import { submitUid, uploadPicture } from "./submit.remote";
 
   let camera = $state<Camera>();
   let idle = $state(true);
-  let stats = $state("...");
   let online = $state(true);
+  let version = $state("null");
+
+  const sse = source(`/tablet/ev?k=${page.url.searchParams.get("k")}`, {
+    error() {
+      online = false;
+    },
+    async close({ connect }) {
+      online = false;
+      console.log("reconnecting...");
+      await new Promise((r) => setTimeout(r, 2000));
+      connect();
+    },
+    open() {
+      online = true;
+    },
+  });
+
   async function submit(uid: string) {
     const id = toast.loading("กำลังส่งข้อมูล...", {
       duration: 30000,
@@ -57,20 +75,17 @@
       toast.error("เกิดข้อผิดพลาดขึ้น", { id });
     }
   }
+
+  const stats = sse.select("stats");
+  const versionEv = sse.select("version");
   $effect(() => {
-    async function fetchStats() {
-      try {
-        await getStats().refresh();
-        stats = await getStats();
-        online = true;
-      } catch (e) {
-        console.error("Cannot poll stats", e);
-        online = false;
-      }
+    const newVer = $versionEv;
+    if (!newVer) return;
+    if (version === "null") {
+      version = newVer;
+      return;
     }
-    const interval = setInterval(fetchStats, 60000);
-    fetchStats();
-    return () => clearInterval(interval);
+    if (version !== newVer) location.reload();
   });
 </script>
 
@@ -86,7 +101,7 @@
         class="flex flex-col text-2xl p-1 m-2 rounded bg-[#fff5] justify-evenly items-center"
       >
         อยู่ในโรงเรียน
-        <span class="text-2xl">{stats}</span>
+        <span class="text-2xl">{$stats}</span>
       </span>
     {/if}
   </div>
