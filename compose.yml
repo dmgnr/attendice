@@ -6,3 +6,4 @@ services:
       - 8806:3000
     volumes:
       - ./data:/app/data
+    stop_grace_period: 1s
