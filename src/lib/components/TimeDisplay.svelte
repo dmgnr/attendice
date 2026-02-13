@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { House, School, Wifi } from "@lucide/svelte";
+  import House from "@lucide/svelte/icons/house";
+  import School from "@lucide/svelte/icons/school";
+  import Wifi from "@lucide/svelte/icons/wifi";
   import { cn } from "$lib/utils";
 
   let {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ClockFading } from "@lucide/svelte";
+  import ClockFading from "@lucide/svelte/icons/clock-fading";
 
   export const { idle = false } = $props();
 </script>
