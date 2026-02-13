@@ -37,7 +37,11 @@ const sse: SseFn = (channel, motd) => {
     subber.subscribe(`${prefix}${channel}`, listener);
     return function stop() {
       console.log(`DSC ${channel}`);
-      subber.unsubscribe(`${prefix}${channel}`, listener).catch(() => {});
+      try {
+        subber.unsubscribe(`${prefix}${channel}`, listener).catch(() => {});
+      } catch {
+        // ignore unsubscribe error, mostly due to reconnects
+      }
     };
   });
 };
