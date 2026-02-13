@@ -12,6 +12,6 @@ export async function POST({ url }) {
 
   return sse("main", [
     { event: "stats", data: await getStats() },
-    { event: "version", data: env.DEPLOYMENT_ID },
+    { event: "version", data: env.DEPLOYMENT_ID ?? "" },
   ]);
 }
