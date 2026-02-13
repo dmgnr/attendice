@@ -21,4 +21,4 @@ RUN bun -e "const id = Bun.randomUUIDv7(); Bun.write('.version', id); Bun.write(
 
 EXPOSE 3000
 
-CMD bun start.ts
+CMD ["bun", "start.ts"]
