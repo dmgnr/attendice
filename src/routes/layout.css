@@ -123,6 +123,7 @@
     font-family: "Google Sans";
     font-style: normal;
     font-weight: 400 500 600;
+    font-display: swap;
     src:
       local(""),
       url("/fonts/google_sans.woff2") format("woff2");
