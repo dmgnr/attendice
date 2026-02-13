@@ -122,10 +122,10 @@
   @font-face {
     font-family: "Google Sans";
     font-style: normal;
-    font-weight: 500;
+    font-weight: 400 500 600;
     src:
       local(""),
-      url("/fonts/google_sans.ttf") format("truetype");
+      url("/fonts/google_sans.woff2") format("woff2");
   }
 }
 
