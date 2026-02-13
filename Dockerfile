@@ -12,6 +12,7 @@ WORKDIR /app
 
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/package.json .
+COPY --from=builder /app/start.ts .
 COPY --from=builder /app/drizzle drizzle/
 COPY --from=builder /app/build build/
 
@@ -19,4 +20,4 @@ RUN bun -e "const id = Bun.randomUUIDv7(); Bun.write('.version', id); Bun.write(
 
 EXPOSE 3000
 
-CMD bun build/index.js
+CMD bun start.ts
