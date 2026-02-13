@@ -10,8 +10,9 @@ RUN bun run build
 FROM oven/bun AS runner
 WORKDIR /app
 
-COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/package.json .
+RUN bun i --frozen-lockfile --production
+
 COPY --from=builder /app/start.ts .
 COPY --from=builder /app/drizzle drizzle/
 COPY --from=builder /app/build build/
