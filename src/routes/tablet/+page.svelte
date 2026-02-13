@@ -89,6 +89,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Attendice</title>
+</svelte:head>
+
 <UidInput onUid={submit} />
 <Camera bind:this={camera} active={!idle} />
 <div class="flex w-dvw h-dvh font-google-sans select-none">
