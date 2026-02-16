@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { hashText } from "$lib/hash";
 import { db } from "./db";
 import { attendances, students } from "./db/schema";
 
@@ -33,4 +34,17 @@ export async function getStats() {
     );
   `);
   return res.rows[0]?.label?.toString() || "";
+}
+
+export async function convertToPublicAttEntry(
+  e: Omit<typeof attendances.$inferSelect, "student" | "time" | "pict"> & {
+    uid: string;
+  },
+) {
+  return {
+    id: e.id,
+    type: e.type,
+    day: e.day!,
+    hash: await hashText(e.uid),
+  };
 }

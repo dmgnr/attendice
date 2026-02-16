@@ -1,22 +1,31 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { Toaster, toast } from "svelte-sonner";
   import { source } from "sveltekit-sse";
   import { page } from "$app/state";
   import Camera from "$lib/components/Camera.svelte";
   import Card from "$lib/components/Card.svelte";
+  import CardImmediate from "$lib/components/CardImmediate.svelte";
   import Idle from "$lib/components/Idle.svelte";
   import TimeDisplay from "$lib/components/TimeDisplay.svelte";
   import UidInput from "$lib/components/UidInput.svelte";
+  import { db, type LocalAttendance } from "$lib/local";
+  import { checkLocal, syncAttendance, syncStudentsList } from "$lib/sync";
   import { submitUid, uploadPicture } from "./submit.remote";
+
+  const pageKey = page.url.searchParams.get("k");
 
   let camera = $state<Camera>();
   let idle = $state(true);
   let online = $state(true);
   let version = $state("null");
 
-  const sse = source(`/tablet/ev?k=${page.url.searchParams.get("k")}`, {
-    error() {
+  const sse = source(`/tablet/ev?k=${pageKey}`, {
+    async error({ connect }) {
       online = false;
+      console.log("reconnecting...");
+      await new Promise((r) => setTimeout(r, 2000));
+      connect();
     },
     async close({ connect }) {
       online = false;
@@ -26,7 +35,14 @@
     },
     open() {
       online = true;
+      syncAttendance(pageKey);
+      syncStudentsList(pageKey);
     },
+  });
+
+  onMount(() => {
+    syncAttendance(pageKey);
+    syncStudentsList(pageKey);
   });
 
   async function submit(uid: string) {
@@ -41,17 +57,19 @@
       } catch (e) {
         console.error("Could not capture picture", e);
       }
-      // const res = await fetch("/api/submit", {
-      //   method: "POST",
-      //   body: JSON.stringify({ uid }),
-      // });
-      const r = await submitUid(uid);
-      console.log(r);
+      const rl = await checkLocal(uid);
+      // show immediate response
+      if (rl === 200)
+        toast.custom(CardImmediate, {
+          id,
+          duration: 60000,
+        });
+      const r = rl === 200 ? await submitUid(uid) : ({ status: rl } as const);
       switch (r.status) {
         case 404:
-          return toast.warning("ไม่พบรหัสนักเรียนนี้", { id });
+          return toast.warning("ไม่พบรหัสนักเรียนนี้", { id, duration: 5000 });
         case 409:
-          return toast.warning("คุณลงทะเบียนไปแล้ว", { id });
+          return toast.warning("คุณลงทะเบียนไปแล้ว", { id, duration: 5000 });
         case 200: {
           const json: { name: string; room: string } = r.student;
           console.log(json);
@@ -72,17 +90,28 @@
       }
     } catch (e) {
       console.error(e);
-      toast.error("เกิดข้อผิดพลาดขึ้น", { id });
+      toast.error("เกิดข้อผิดพลาดขึ้น", { id, duration: 5000 });
     }
   }
 
   const stats = sse.select("stats");
   const versionEv = sse.select("version");
+  const attendanceStream = sse.select("attendance").json<LocalAttendance>();
+  $effect(() => {
+    async function check() {
+      if (!$attendanceStream) return;
+      if (!db.attend.where("id").equals($attendanceStream.id).count()) {
+        await db.attend.add($attendanceStream);
+      }
+    }
+    check();
+  });
   $effect(() => {
     const newVer = $versionEv;
     if (!newVer) return;
     if (version === "null") {
       version = newVer;
+      console.log(`Version\nClient: ${version}\nVersion: ${newVer}`);
       return;
     }
     if (version !== newVer) location.reload();

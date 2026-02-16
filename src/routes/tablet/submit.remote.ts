@@ -2,7 +2,7 @@ import { inspect } from "node:util";
 import { eq } from "drizzle-orm";
 import z from "zod";
 import { command } from "$app/server";
-import { getStats } from "$lib/server/queries";
+import { convertToPublicAttEntry, getStats } from "$lib/server/queries";
 import { sse } from "$lib/server/redis";
 import { db } from "../../lib/server/db";
 import { attendances, students } from "../../lib/server/db/schema";
@@ -13,7 +13,12 @@ export const submitUid: (
   | { status: 404 | 409; student: undefined; id: undefined }
   | { status: 200; student: typeof students.$inferSelect; id: string }
 > = command(z.string().min(10).regex(/^\d+$/), async (uid) => {
-  let res: { id: string }[];
+  let res: (Omit<
+    typeof attendances.$inferSelect,
+    "student" | "time" | "pict"
+  > & {
+    uid: string;
+  })[];
   try {
     res = await db
       .insert(attendances)
@@ -21,7 +26,12 @@ export const submitUid: (
         student: uid,
       })
       .onConflictDoNothing()
-      .returning({ id: attendances.id });
+      .returning({
+        id: attendances.id,
+        uid: attendances.student,
+        type: attendances.type,
+        day: attendances.day,
+      });
 
     getStats().then((stats) =>
       sse.publish("main", {
@@ -50,6 +60,7 @@ export const submitUid: (
   }
 
   if (!res.length) return { status: 409 };
+  const [entry] = res;
 
   const [student] = await db
     .select()
@@ -57,7 +68,14 @@ export const submitUid: (
     .where(eq(students.id, uid))
     .limit(1);
 
-  return { status: 200, student, id: res[0].id };
+  convertToPublicAttEntry(entry).then((e) =>
+    sse.publish("main", {
+      event: "attendance",
+      data: JSON.stringify(e),
+    }),
+  );
+
+  return { status: 200, student, id: entry.id };
 });
 
 export const uploadPicture = command(
