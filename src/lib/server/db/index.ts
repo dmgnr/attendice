@@ -14,20 +14,22 @@ export const db = drizzle({
 
 await migrate(db, { migrationsFolder: "drizzle" });
 // @ts-expect-error stupid ts
-await seed(db, { students: schema.students }).refine((f) => ({
-  students: {
-    columns: {
-      id: f.int({
-        minValue: 1000000000,
-        maxValue: 9999999999,
-        isUnique: true,
-      }),
-      name: f.fullName(),
-      room: f.int({
-        minValue: 11,
-        maxValue: 69,
-      }),
+await seed(db, { students: schema.students })
+  .refine((f) => ({
+    students: {
+      columns: {
+        id: f.int({
+          minValue: 1000000000,
+          maxValue: 9999999999,
+          isUnique: true,
+        }),
+        name: f.fullName(),
+        room: f.int({
+          minValue: 11,
+          maxValue: 69,
+        }),
+      },
+      count: 2919,
     },
-    count: 2919,
-  },
-}));
+  }))
+  .catch((e: any) => console.error("Cannot seed", e.cause));
