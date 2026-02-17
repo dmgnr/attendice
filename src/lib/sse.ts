@@ -13,7 +13,7 @@ export function es(
     if (ctx.source && ctx.source.readyState !== 2) return ctx.source;
     const source = new ReconnectingEventSource(path);
     if (hooks.error) source.onerror = hooks.error;
-    if (hooks.error) source.onerror = hooks.error;
+    if (hooks.open) source.onopen = hooks.open;
     ctx.source = source;
     return source;
   }
