@@ -1,5 +1,4 @@
 import { get, writable } from "svelte/store";
-import { uuidv7 } from "uuidv7";
 import { hashText } from "./hash";
 import { db } from "./local";
 import { getHashes, retrieveSync } from "./sync.remote";
@@ -25,9 +24,12 @@ export async function syncStudentsList(key: string | null) {
   const count = await db.hashes.count();
   console.log("Syncing students list");
   const res = await getHashes([key, count]);
-  if (!res) return console.log("Students list upto date");
+  if (!res) return console.log(`Students list upto date (${count})`);
   console.log("Got", res.length, "students entries");
-  await db.hashes.bulkAdd(res);
+  await db.transaction("rw", db.hashes, async (tx) => {
+    await tx.hashes.clear();
+    await tx.hashes.bulkAdd(res);
+  });
   setTimeout(syncLockStudents.set.bind(undefined, false), 1000);
 }
 
@@ -43,6 +45,7 @@ export async function checkLocal(uid: string): Promise<200 | 404 | 409> {
   if (!found) return 404;
   const existing = await db.attend.get({ hash, day, type });
   if (existing) return 409;
-  await db.attend.add({ id: uuidv7(), hash, day, type });
+  // doing this will cause UUID difference, therefore conflict
+  // await db.attend.add({ id: uuidv7(), hash, day, type });
   return 200;
 }
