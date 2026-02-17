@@ -10,7 +10,7 @@ export function es(
 ) {
   const ctx: { source?: ReconnectingEventSource; count: number } = { count: 0 };
   function connect() {
-    if (ctx.source?.readyState === 1) return ctx.source;
+    if (ctx.source && ctx.source.readyState !== 2) return ctx.source;
     const source = new ReconnectingEventSource(path);
     if (hooks.error) source.onerror = hooks.error;
     if (hooks.error) source.onerror = hooks.error;
