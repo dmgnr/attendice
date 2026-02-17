@@ -4,7 +4,7 @@ import { db } from "./db";
 import { attendances, students } from "./db/schema";
 
 export async function getStats() {
-  const res = await db.run(sql<{ label: string }>`
+  const [label] = db.get<[string]>(sql`
     SELECT
       present || '/' || total AS label
     FROM (
@@ -33,7 +33,7 @@ export async function getStats() {
       SELECT COUNT(*) AS total FROM ${students}
     );
   `);
-  return res.rows[0]?.label?.toString() || "";
+  return label || "";
 }
 
 export async function convertToPublicAttEntry(
