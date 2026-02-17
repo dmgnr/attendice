@@ -6,6 +6,6 @@ export default defineConfig({
   schema: "./src/lib/server/db/schema.ts",
   dialect: "turso",
   dbCredentials: {
-    url: "file:data/turso.db",
+    url: "file:data/sqlite.db",
   },
 });
