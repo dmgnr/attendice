@@ -12,6 +12,7 @@
   import { db, type LocalAttendance } from "$lib/local";
   import { checkLocal, syncAttendance, syncStudentsList } from "$lib/sync";
   import { submitUid, uploadPicture } from "./submit.remote";
+    import { es } from "$lib/sse";
 
   const pageKey = page.url.searchParams.get("k");
 
@@ -20,18 +21,11 @@
   let online = $state(true);
   let version = $state("null");
 
-  const sse = source(`/tablet/ev?k=${pageKey}`, {
-    async error({ connect }) {
+  const sse = es(`/tablet/ev?k=${pageKey}`, {
+    async error() {
       online = false;
       console.log("reconnecting...");
       await new Promise((r) => setTimeout(r, 2000));
-      connect();
-    },
-    async close({ connect }) {
-      online = false;
-      console.log("reconnecting...");
-      await new Promise((r) => setTimeout(r, 2000));
-      connect();
     },
     open() {
       online = true;

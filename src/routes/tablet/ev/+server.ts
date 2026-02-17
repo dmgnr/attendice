@@ -3,7 +3,7 @@ import { env } from "$env/dynamic/private";
 import { getStats } from "$lib/server/queries";
 import { sse } from "$lib/server/redis";
 
-export async function POST({ url }) {
+export async function GET({ url }) {
   if (env.PAGE_KEY && url.searchParams.get("k") !== env.PAGE_KEY)
     throw error(
       404,

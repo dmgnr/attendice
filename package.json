@@ -38,6 +38,7 @@
     "@libsql/client": "^0.17.0",
     "drizzle-orm": "^0.45.1",
     "drizzle-seed": "^0.3.1",
+    "reconnecting-eventsource": "^1.6.5",
     "svelte-sonner": "^1.0.7",
     "uuidv7": "^1.1.0",
     "zod": "^4.3.6"

@@ -8,6 +8,7 @@
         "@libsql/client": "^0.17.0",
         "drizzle-orm": "^0.45.1",
         "drizzle-seed": "^0.3.1",
+        "reconnecting-eventsource": "^1.6.5",
         "svelte-sonner": "^1.0.7",
         "uuidv7": "^1.1.0",
         "zod": "^4.3.6",
@@ -427,6 +428,8 @@
     "pure-rand": ["pure-rand@6.1.0", "", {}, "sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA=="],
 
     "readdirp": ["readdirp@4.1.2", "", {}, "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="],
+
+    "reconnecting-eventsource": ["reconnecting-eventsource@1.6.5", "", {}, "sha512-L7ADnbp7yA42vvjwx7cZFNmiyHNBu/UldL1NCEvB23xBkZhESF83s2cnD9sLfvcX9wMIzW1UpIS7EOq/iu3E2g=="],
 
     "resolve-pkg-maps": ["resolve-pkg-maps@1.0.0", "", {}, "sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw=="],
 
